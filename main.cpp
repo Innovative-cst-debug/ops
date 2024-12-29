@@ -4,7 +4,7 @@
 #include <RTClib.h>
 
 int WIDTH 32
-int PANELS 1
+int PANELS 3
 SoftDMD dmd(WIDTH * PANELS, 16, 1);
 
 RTC_DS3231 rtc;
