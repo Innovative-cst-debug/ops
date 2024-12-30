@@ -1,42 +1,50 @@
-#include <DMD2.h>
-#include <fonts/SystemFont5x7.h>
-#include <Wire.h>
-#include <RTClib.h>
+#include <PxMatrix.h>
 
-int WIDTH 32
-int PANELS 3
-SoftDMD dmd(WIDTH * PANELS, 16, 1);
+#define P_LAT 16
+#define P_A 5
+#define P_B 4
+#define P_C 15
+#define P_D 12
+#define P_E 0
+#define P_OE 2
 
-RTC_DS3231 rtc;
+// Define the display dimensions
+#define WIDTH 64
+#define HEIGHT 32
+
+PxMATRIX display(WIDTH, HEIGHT, P_LAT, P_OE, P_A, P_B, P_C, P_D);
+
+int scrollPosition = WIDTH;
 
 void setup() {
-  Serial.begin(9600);
-
-  dmd.setBrightness(255);
-  dmd.begin();
-
-  if (!rtc.begin()) {
-    Serial.println("Couldn't find RTC");
-    while (1);
-  }
-  if (rtc.lostPower()) {
-    Serial.println("RTC lost power, setting the time.");
-    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
-  }
+  display.begin(16);
+  display.setBrightness(50);
+  display.clearDisplay();
 }
 
 void loop() {
-  dmd.clearScreen();
+  display.clearDisplay();
 
-  dmd.selectFont(SystemFont5x7);
-  dmd.drawMarquee("Oxford Dreen Public School", 27, 0, 0);
+  // Set the text color for "Oxford"
+  display.setTextColor(display.color565(255, 255, 255)); // White
+  display.setCursor(scrollPosition, 0);
+  display.print("Oxford ");
 
-  DateTime now = rtc.now();
-  char timeStr[9];
-  sprintf(timeStr, "%02d:%02d", now.hour(), now.second());
-  dmd.drawString(0, 9, timeStr, GRAPHICS_NORMAL);
+  // Set the text color for "Green"
+  display.setTextColor(display.color565(0, 255, 0)); // Green
+  display.print("Green ");
 
-  dmd.refresh();
+  // Set the text color for "Public School"
+  display.setTextColor(display.color565(255, 255, 255)); // White
+  display.print("Public School");
 
-  delay(1);
+  display.showBuffer();
+
+  // Adjust scroll position
+  scrollPosition--;
+  if (scrollPosition < -200) { // Adjust to match the length of the text
+    scrollPosition = WIDTH;
+  }
+
+  delay(50); // Adjust scroll speed
 }
